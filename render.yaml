@@ -1,7 +1,3 @@
-# Render "Blueprint" — deploys the backend automatically from this repo.
-# In Render: New -> Blueprint -> pick this repo -> it reads this file.
-# Docs: https://render.com/docs/blueprint-spec
-
 databases:
   - name: ridego-db
     plan: free
@@ -25,6 +21,6 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CLIENT_URL
-        sync: false   # set this to your deployed frontend URL (e.g. https://ridego.vercel.app) after you deploy it
+        sync: false 
       - key: PORT
         value: 4000
