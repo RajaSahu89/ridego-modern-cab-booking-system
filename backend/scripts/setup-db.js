@@ -1,5 +1,3 @@
-// One command to get the database ready: creates it if missing, then creates all tables.
-// Safe to run again at any time (it never deletes data).
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
@@ -13,7 +11,6 @@ if (isPlaceholderUrl(url)) {
   process.exit(1);
 }
 
-// Connect to the server's default "postgres" database and create ours.
 async function createDatabase() {
   const u = new URL(cleanUrl(url));
   const name = decodeURIComponent(u.pathname.slice(1));
