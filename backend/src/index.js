@@ -8,7 +8,6 @@ import { q, initDb, isPlaceholderUrl } from './db.js';
 import { authRouter } from './auth.js';
 import ridesRouter from './rides.js';
 
-// ---- Fail early, with a plain-English reason, if .env is not filled in ----
 const problems = [];
 if (isPlaceholderUrl(process.env.DATABASE_URL))
   problems.push('DATABASE_URL is missing or still the example value. Put your real Postgres connection string in backend/.env');
@@ -21,7 +20,6 @@ if (problems.length) {
 
 const app = express();
 
-// Allowed frontend origins. Empty CLIENT_URL = allow any. localhost is always allowed outside production.
 const allowed = (process.env.CLIENT_URL || '').split(',').map((s) => s.trim().replace(/\/$/, '')).filter(Boolean);
 const isDev = process.env.NODE_ENV !== 'production';
 const origin = (o, cb) => {
@@ -46,7 +44,6 @@ app.get('/health', async (_req, res) => {
 app.use('/auth', authRouter);
 app.use('/rides', ridesRouter(io));
 
-// Turn common setup mistakes into a clear message instead of a bare "Server error".
 const NET = ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'ENETUNREACH', 'EAI_AGAIN', 'ECONNRESET'];
 app.use((err, _req, res, _next) => {
   console.error(err);
@@ -60,7 +57,6 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Server error' });
 });
 
-// Socket auth: same JWT as the REST API
 io.use((socket, next) => {
   try {
     socket.user = jwt.verify(socket.handshake.auth.token, process.env.JWT_SECRET);
@@ -81,7 +77,6 @@ io.on('connection', (socket) => {
     await q('UPDATE drivers SET is_online=$2 WHERE user_id=$1', [id, !!online]);
   }));
 
-  // Live location: save the latest point, forward it to riders on this driver's active rides
   socket.on('driver:location', safe(async ({ lat, lng } = {}) => {
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
     await q('UPDATE drivers SET lat=$2, lng=$3, updated_at=now() WHERE user_id=$1', [id, lat, lng]);
@@ -96,11 +91,9 @@ io.on('connection', (socket) => {
     await q('UPDATE drivers SET is_online=false WHERE user_id=$1', [id]);
   }));
 });
-
 const port = process.env.PORT || 4000;
 server.listen(port, async () => {
   console.log(`API listening on ${port}`);
-  // Check the database once at startup and say clearly what is wrong, if anything.
   try {
     await initDb();
     const { rows } = await q("SELECT to_regclass('public.users') AS t");
