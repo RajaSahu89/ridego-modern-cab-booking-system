@@ -27,8 +27,7 @@ export default function Driver({ me }) {
     s.on('ride:update', (r) => { setRide(r); setRequests((l) => l.filter((x) => x.id !== r.id)); });
     return () => { s.disconnect(); if (watch.current != null) navigator.geolocation?.clearWatch(watch.current); };
   }, []);
-
-  // Pick up requests that were made before this driver came online
+  
   useEffect(() => {
     if (!online || !pos || ride) return;
     const t = setTimeout(() => api('/rides/pending').then(setRequests).catch(() => {}), 800);
