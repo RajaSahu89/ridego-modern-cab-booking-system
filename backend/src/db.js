@@ -3,13 +3,9 @@ import pg from 'pg';
 const LOCAL_HOSTS = ['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'];
 const rawUrl = process.env.DATABASE_URL || '';
 
-// We decide SSL ourselves (see sslFor), so drop any ?sslmode=... from the URL;
-// otherwise the pg driver would let it override our choice.
 export const cleanUrl = (cs) =>
   cs.replace(/([?&])sslmode=[^&]*&?/i, '$1').replace(/[?&]$/, '');
 
-// SSL on for hosted databases (Supabase, Neon, Render...), off for a Postgres on this machine.
-// Override with DATABASE_SSL=false (or true) in backend/.env.
 export function sslFor(cs) {
   const flag = (process.env.DATABASE_SSL || '').toLowerCase();
   if (['false', '0', 'off', 'disable'].includes(flag)) return false;
@@ -27,7 +23,7 @@ let sslOn;
 function makePool(ssl) {
   sslOn = !!ssl;
   pool = new pg.Pool({ connectionString: cleanUrl(rawUrl), ssl });
-  // Hosted databases drop idle connections; without this handler that would crash Node.
+
   pool.on('error', (e) => console.error('Database connection error:', e.message));
   return pool;
 }
@@ -35,7 +31,6 @@ makePool(sslFor(rawUrl));
 
 export const q = (text, params) => pool.query(text, params);
 
-// Run several queries as one all-or-nothing transaction.
 export async function tx(fn) {
   const client = await pool.connect();
   try {
@@ -50,9 +45,6 @@ export async function tx(fn) {
     client.release();
   }
 }
-
-// Verify the database is reachable. If the server turns out not to speak SSL
-// (typical for a Postgres installed on your own PC), retry without it.
 export async function initDb() {
   try {
     await pool.query('SELECT 1');
