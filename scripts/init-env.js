@@ -1,5 +1,3 @@
-// Creates backend/.env and frontend/.env from their .env.example files (only if they don't exist yet)
-// and generates a random JWT_SECRET. Works the same on Windows, macOS and Linux.
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
