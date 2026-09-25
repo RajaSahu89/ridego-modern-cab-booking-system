@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Vite can't resolve Leaflet's default marker images, so point at a CDN copy.
 const base = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/';
 L.Icon.Default.mergeOptions({
   iconUrl: base + 'marker-icon.png',
@@ -33,7 +32,6 @@ function Fly({ to }) {
   return null;
 }
 
-// markers: [{ key: 'pickup' | 'drop' | 'car', pos: {lat,lng} | null }]
 export default function MapView({ onPick, markers = [], fly }) {
   return (
     <div className="map-wrap">
