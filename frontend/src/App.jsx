@@ -67,7 +67,6 @@ export default function App() {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
-    // Load theme preference
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     document.documentElement.setAttribute('data-theme', savedTheme);
