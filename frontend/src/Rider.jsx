@@ -4,8 +4,6 @@ import MapView from './MapView';
 import { Rate } from './History';
 
 const LIVE = ['requested', 'accepted', 'started'];
-
-// Car icons for different vehicle types
 const VEHICLE_ICONS = {
   'sedan': '🚗',
   'suv': '🚙',
@@ -70,7 +68,6 @@ export default function Rider() {
     setErr('');
     try {
       await api(`/rides/${ride.id}/cancel`, 'POST');
-      // Wait for websocket update or fallback
       setTimeout(() => reset(), 500);
     } catch (e) { 
       setErr(e.message);
