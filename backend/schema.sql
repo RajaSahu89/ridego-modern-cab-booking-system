@@ -1,5 +1,3 @@
--- Creates all tables. Safe to run more than once (nothing is deleted).
--- Easiest way: run "npm run db:setup" from the ridego folder. Or paste this into the Supabase SQL editor.
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
@@ -14,7 +12,7 @@ CREATE TABLE IF NOT EXISTS drivers (
   vehicle TEXT NOT NULL,
   plate TEXT NOT NULL,
   is_online BOOLEAN DEFAULT false,
-  lat DOUBLE PRECISION,   -- only the latest point is kept (live location)
+  lat DOUBLE PRECISION, 
   lng DOUBLE PRECISION,
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -49,9 +47,6 @@ CREATE TABLE IF NOT EXISTS ratings (
   UNIQUE (ride_id, from_user)
 );
 
--- Supabase exposes public tables through its auto-generated API.
--- Row Level Security with no policies blocks that API; our server connects
--- directly as the database owner, so it is unaffected.
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE drivers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rides ENABLE ROW LEVEL SECURITY;
