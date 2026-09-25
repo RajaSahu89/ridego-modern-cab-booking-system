@@ -29,16 +29,12 @@ export default function ridesRouter(io) {
     io.to(`user:${ride.rider_id}`).emit('ride:update', ride);
     if (ride.driver_id) io.to(`user:${ride.driver_id}`).emit('ride:update', ride);
   };
-
-  // Fare preview before booking
   r.post('/estimate', wrap(async (req, res) => {
     const { pickup, drop } = req.body;
     if (!validPoint(pickup) || !validPoint(drop))
       return res.status(400).json({ error: 'Pickup and drop-off are required' });
     res.json(estimate(pickup, drop));
   }));
-
-  // Rider books a ride -> match the nearest free online drivers
   r.post('/', only('rider'), wrap(async (req, res) => {
     const { pickup, drop } = req.body;
     if (!validPoint(pickup) || !validPoint(drop))
@@ -78,8 +74,6 @@ export default function ridesRouter(io) {
     );
     res.json(rows[0] || null);
   }));
-
-  // Requests already waiting near a driver who just went online
   r.get('/pending', only('driver'), wrap(async (req, res) => {
     const { rows: [d] } = await q('SELECT lat, lng FROM drivers WHERE user_id=$1', [req.user.id]);
     if (!d || d.lat == null) return res.json([]);
@@ -100,8 +94,6 @@ export default function ridesRouter(io) {
     const byRide = Object.fromEntries(mine.rows.map((m) => [m.ride_id, m.stars]));
     res.json(rows.map((x) => ({ ...x, my_rating: byRide[x.id] || null })));
   }));
-
-  // Atomic accept: only one driver can flip 'requested' -> 'accepted'
   r.post('/:id/accept', only('driver'), wrap(async (req, res) => {
     const busy = await q("SELECT 1 FROM rides WHERE driver_id=$1 AND status IN ('accepted','started')", [req.user.id]);
     if (busy.rowCount) return res.status(409).json({ error: 'Finish your current ride first' });
@@ -114,8 +106,6 @@ export default function ridesRouter(io) {
     push(ride);
     res.json(ride);
   }));
-
-  // `from`, `to` and `extra` are fixed strings below, never user input.
   const transition = (from, to, extra = '') =>
     wrap(async (req, res) => {
       const upd = await q(
